@@ -1,6 +1,6 @@
 # 👁️‍🗨️ DARSHAN – Visionary AI for Preventing Blindness
 
-![darshan-banner](assets/darshan_banner.png)
+![darshan-banner](darshan-banner.png)
 
 **DARSHAN** (दर्शन) is an intelligent AI-driven platform that leverages deep learning to detect eye diseases from retinal fundus images—aiming to stop blindness *before it begins*. This project was developed as part of the CDAC Hackathon **"Visionary AI: Hacking Blindness Before It Begins"**, hosted by the Ministry of Electronics & IT, Govt. of India.
 
