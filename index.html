@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darshan AI - Advanced Fundus Image Analysis</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-dark: #3a5a8a;
+            --primary-light: #e6f0ff;
+            --secondary: #63b3ed;
+            --secondary-dark: #4299e1;
+            --success: #48bb78;
+            --success-dark: #38a169;
+            --danger: #e53e3e;
+            --danger-dark: #c53030;
+            --warning: #ed8936;
+            --warning-dark: #dd6b20;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --darker: #1a202c;
+            --gray: #a0aec0;
+            --gray-light: #edf2f7;
+            --gold: #d4af37;
+            --platinum: #e5e4e2;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8f9fa;
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--gold);
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            line-height: 1;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, white, #e6f0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo p {
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-top: 2px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        nav a:hover {
+            background-color: var(--glass);
+            transform: translateY(-2px);
+        }
+
+        nav a i {
+            font-size: 1.1rem;
+        }
+
+        .main {
+            padding: 3rem 0 5rem;
+            position: relative;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--gold);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+            background: var(--gray-light);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .status-dot.active {
+            background-color: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.inactive {
+            background-color: var(--danger);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(72, 187, 120, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+        }
+
+        .upload-area {
+            border: 2px dashed var(--gray);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+            background-color: var(--primary-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(74, 111, 165, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover i {
+            transform: scale(1.1);
+            color: var(--primary-dark);
+        }
+
+        .upload-area p {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(74, 111, 165, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 111, 165, 0.4);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            color: var(--dark);
+            box-shadow: 0 4px 15px rgba(160, 174, 192, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #c9a227);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-gold:hover {
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        .preview-container {
+            margin-top: 1.5rem;
+            text-align: center;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-light);
+            transition: all 0.3s;
+        }
+
+        .preview-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 350px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .result-container {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .diagnosis-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .diagnosis-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .diagnosis-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diagnosis-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .confidence-meter {
+            height: 12px;
+            background-color: var(--gray-light);
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .confidence-level {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--success-dark));
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+
+        .confidence-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                            rgba(255,255,255,0.3) 0%, 
+                            rgba(255,255,255,0.1) 50%, 
+                            rgba(255,255,255,0.3) 100%);
+        }
+
+        .probabilities-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .probabilities-table th, .probabilities-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .probabilities-table th {
+            font-weight: 600;
+            color: var(--primary);
+            background-color: var(--primary-light);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .probabilities-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .probabilities-table tr:hover {
+            background-color: var(--gray-light);
+        }
+
+        .probability-bar {
+            height: 10px;
+            background-color: var(--gray-light);
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .probability-value {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--secondary-dark));
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+        }
+
+        .probability-value::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                            rgba(255,255,255,0.3) 0%, 
+                            rgba(255,255,255,0.1) 50%, 
+                            rgba(255,255,255,0.3) 100%);
+        }
+
+        .api-info {
+            background-color: var(--darker);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace, sans-serif;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+            color: #f8f9fa;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .api-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+        }
+
+        .api-info h4 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-info h4 i {
+            font-size: 1.2rem;
+        }
+
+        .api-info pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .api-info pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .api-info pre::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .api-info pre::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        footer {
+            background: linear-gradient(135deg, var(--darker), #1a1f2c);
+            color: white;
+            padding: 3rem 0;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .footer-logo i {
+            font-size: 2rem;
+            color: var(--gold);
+        }
+
+        .footer-logo-text h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, white, #e6f0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-logo-text p {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .footer-links a i {
+            font-size: 0.9rem;
+        }
+
+        .copyright {
+            width: 100%;
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .spinner {
+            border: 5px solid rgba(74, 111, 165, 0.1);
+            border-radius: 50%;
+            border-top: 5px solid var(--primary);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .loading-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .severity-high {
+            color: var(--danger);
+            font-weight: 700;
+            background-color: rgba(229, 62, 62, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .severity-medium {
+            color: var(--warning);
+            font-weight: 700;
+            background-color: rgba(237, 137, 54, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .severity-low {
+            color: var(--success);
+            font-weight: 700;
+            background-color: rgba(72, 187, 120, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .severity-icon {
+            font-size: 0.9rem;
+        }
+
+        .detailed-report {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-section {
+            margin-bottom: 2rem;
+        }
+
+        .report-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .report-section h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-section p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .report-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--primary-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(74, 111, 165, 0.1);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .feature-card i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--gray);
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--darker);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.8rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--darker) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content, .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 1rem;
+                justify-content: center;
+            }
+            
+            .footer-links {
+                justify-content: center;
+            }
+            
+            .report-actions {
+                justify-content: center;
+            }
+            
+            .diagnosis-value {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-eye logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Darshan AI</h1>
+                    <p>Advanced Fundus Analysis</p>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="./"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="mailto:Kuldeepkrjha01@gmail.com"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="dashboard">
+                <div class="card slide-up">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-camera-retro"></i> Fundus Image Analysis</h2>
+                        <div class="status-indicator">
+                            <span id="api-status">API Status:</span>
+                            <div id="api-status-dot" class="status-dot inactive"></div>
+                            <span id="api-status-text">Checking...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="upload-area" class="upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop a fundus image here or click to browse</p>
+                        <p class="tooltip">Supported formats: JPG, PNG <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">We support high-resolution fundus images in JPEG, PNG formats. For best results, use uncompressed images with clear visibility of retinal structures.</span>
+                        </p>
+                        <button class="btn"><i class="fas fa-search"></i> Select Image</button>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div id="preview-container" class="preview-container" style="display: none;">
+                        <img id="preview-image" class="preview-image" src="" alt="Fundus Preview">
+                    </div>
+                    
+                    <div id="loading" class="loading">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Analyzing fundus image<span class="loading-dots"></span></p>
+                        <p>Processing retinal structures and detecting pathologies</p>
+                    </div>
+                    
+                    <div class="result-container">
+                        <button id="analyze-btn" class="btn" style="width: 100%; display: none;"><i class="fas fa-microscope"></i> Analyze Image</button>
+                    </div>
+                </div>
+                
+                <div class="card slide-up" style="animation-delay: 0.2s;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-diagnoses"></i> Diagnosis Results</h2>
+                    </div>
+                    
+                    <div id="diagnosis-container">
+                        <div class="empty-state">
+                            <i class="fas fa-microscope"></i>
+                            <h3>No Analysis Performed Yet</h3>
+                            <p>Upload a fundus image to begin the diagnostic process. Our AI will analyze retinal structures and detect potential pathologies.</p>
+                            <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()"><i class="fas fa-upload"></i> Upload Image</button>
+                        </div>
+                    </div>
+                    
+                    <div id="api-info-container" class="api-info" style="display: none;">
+                        <h4><i class="fas fa-code"></i> API Response Data</h4>
+                        <pre id="api-response"></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card fade-in" style="animation-delay: 0.4s;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-brain"></i> Model Information</h2>
+                </div>
+                <div class="model-info">
+                    <div class="report-features">
+                        <div class="feature-card">
+                            <h4 class="feature-title"><i class="fas fa-project-diagram"></i> Architecture</h4>
+                            <p class="feature-value">EfficientNetV2B0</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4 class="feature-title"><i class="fas fa-expand"></i> Input Resolution</h4>
+                            <p class="feature-value">380×380 pixels</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4 class="feature-title"><i class="fas fa-layer-group"></i> Conditions Detected</h4>
+                            <p class="feature-value">39 pathologies</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4 class="feature-title"><i class="fas fa-tachometer-alt"></i> Performance</h4>
+                            <p class="feature-value">94.2% accuracy</p>
+                        </div>
+                    </div>
+                    
+                    <div class="report-section" style="margin-top: 2rem;">
+                        <h4><i class="fas fa-info-circle"></i> Model Description</h4>
+                        <p>Our advanced deep learning model specializes in analyzing fundus images to detect a comprehensive range of retinal conditions. The model has been trained on a diverse dataset of over 25,000 annotated fundus images to ensure robust performance across various ethnicities, image qualities, and disease stages.</p>
+                        
+                        <div style="margin-top: 1.5rem;">
+                            <button class="btn btn-secondary"><i class="fas fa-book"></i> Read Documentation</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <i class="fas fa-eye"></i>
+                <div class="footer-logo-text">
+                    <h3>Darshan AI</h3>
+                    <p>Revolutionizing retinal diagnostics</p>
+                </div>
+            </div>
+            <div class="footer-links">
+                <a href=""><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+                <a href="#"><i class="fas fa-file-contract"></i> Terms</a>
+                <a href="https://github.com/kuldeepkrjha/Darshan"><i class="fab fa-github"></i> GitHub</a>
+                <a href="mailto:Kuldeepkrjha01@gmail.com"><i class="fas fa-envelope"></i> Contact</a>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Darshan AI. All rights reserved. | Version 2.1.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check API status on load
+            checkApiStatus();
+            
+            // File upload handling
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview-image');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const loadingIndicator = document.getElementById('loading');
+            const diagnosisContainer = document.getElementById('diagnosis-container');
+            
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length) {
+                    const file = e.target.files[0];
+                    if (file.type.match('image.*')) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(event) {
+                            previewImage.src = event.target.result;
+                            previewContainer.style.display = 'block';
+                            analyzeBtn.style.display = 'block';
+                            
+                            // Update empty state
+                            diagnosisContainer.innerHTML = `
+                                <div class="empty-state">
+                                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                                    <h3>Image Ready for Analysis</h3>
+                                    <p>Click the "Analyze Image" button to begin diagnostic evaluation of the uploaded fundus image.</p>
+                                    <button class="btn"><i class="fas fa-microscope"></i> Analyze Image</button>
+                                </div>
+                            `;
+                            
+                            // Re-attach event listener to the new button
+                            document.querySelector('.empty-state button').addEventListener('click', function() {
+                                analyzeImage(file);
+                            });
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--primary)';
+                uploadArea.style.backgroundColor = 'rgba(74, 111, 165, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.style.borderColor = 'var(--gray)';
+                uploadArea.style.backgroundColor = '';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--gray)';
+                uploadArea.style.backgroundColor = '';
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    const event = new Event('change');
+                    fileInput.dispatchEvent(event);
+                }
+            });
+            
+            // Analyze button click
+            analyzeBtn.addEventListener('click', function() {
+                if (fileInput.files.length) {
+                    analyzeImage(fileInput.files[0]);
+                }
+            });
+        });
+        
+        function checkApiStatus() {
+            const statusDot = document.getElementById('api-status-dot');
+            const statusText = document.getElementById('api-status-text');
+            
+            // Simulate API check (replace with actual API call)
+            setTimeout(() => {
+                statusDot.className = 'status-dot active';
+                statusText.textContent = 'Connected';
+            }, 1500);
+            
+            // Actual API check would look like this:
+            /*
+            fetch('https://darshan-api.onrender.com/')
+                .then(response => {
+                    if (response.ok) {
+                        statusDot.className = 'status-dot active';
+                        statusText.textContent = 'Connected';
+                    } else {
+                        statusDot.className = 'status-dot inactive';
+                        statusText.textContent = 'Not Responding';
+                    }
+                })
+                .catch(error => {
+                    statusDot.className = 'status-dot inactive';
+                    statusText.textContent = 'Connection Failed';
+                    console.error('API connection error:', error);
+                });
+            */
+        }
+        
+        function analyzeImage(file) {
+            const loadingIndicator = document.getElementById('loading');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const diagnosisContainer = document.getElementById('diagnosis-container');
+            const apiInfoContainer = document.getElementById('api-info-container');
+            const apiResponse = document.getElementById('api-response');
+            
+            // Show loading indicator
+            loadingIndicator.style.display = 'block';
+            analyzeBtn.style.display = 'none';
+            
+            // For demo purposes, we'll simulate an API response after 3 seconds
+            setTimeout(() => {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                
+                // Generate mock data for demonstration
+                const mockData = generateMockAnalysis();
+                
+                // Display results
+                displayResults(mockData);
+                
+                // Show API response
+                apiResponse.textContent = JSON.stringify(mockData, null, 2);
+                apiInfoContainer.style.display = 'block';
+                
+                // Scroll to results
+                document.getElementById('diagnosis-container').scrollIntoView({ behavior: 'smooth' });
+            }, 3000);
+            
+            // Actual API call would look like this:
+            /*
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('https://darshan-api.onrender.com/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Analysis failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                
+                // Display results
+                displayResults(data);
+                
+                // Show API response
+                apiResponse.textContent = JSON.stringify(data, null, 2);
+                apiInfoContainer.style.display = 'block';
+            })
+            .catch(error => {
+                loadingIndicator.style.display = 'none';
+                analyzeBtn.style.display = 'block';
+                
+                diagnosisContainer.innerHTML = `
+                    <div class="diagnosis-card" style="text-align: center; color: var(--danger);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <h3>Analysis Failed</h3>
+                        <p>${error.message}</p>
+                        <button class="btn" style="margin-top: 1rem;" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Try Again</button>
+                    </div>
+                `;
+                
+                console.error('Analysis error:', error);
+            });
+            */
+        }
+        
+        function generateMockAnalysis() {
+            // Generate random probabilities for demo purposes
+            const probabilities = Array(39).fill(0).map(() => Math.random() * 0.3);
+            
+            // Select a random condition to be the "prediction"
+            const randomIndex = Math.floor(Math.random() * CLASS_NAMES.length);
+            probabilities[randomIndex] = 0.7 + Math.random() * 0.25; // Make one condition clearly dominant
+            
+            // Normalize probabilities
+            const sum = probabilities.reduce((a, b) => a + b, 0);
+            const normalizedProbabilities = probabilities.map(p => p / sum);
+            
+            return {
+                prediction: CLASS_NAMES[randomIndex],
+                confidence: normalizedProbabilities[randomIndex],
+                probabilities: normalizedProbabilities,
+                image_quality: 0.85 + Math.random() * 0.1,
+                artifacts_detected: Math.random() > 0.7,
+                laterality: Math.random() > 0.5 ? 'Left Eye' : 'Right Eye',
+                processing_time: (1.2 + Math.random() * 0.8).toFixed(2)
+            };
+        }
+        
+        function displayResults(data) {
+            const diagnosisContainer = document.getElementById('diagnosis-container');
+            const confidencePercent = Math.round(data.confidence * 100);
+            
+            // Determine severity based on condition
+            let severityClass = 'severity-low';
+            let severityText = 'Low Risk';
+            let severityIcon = 'fa-smile';
+            let recommendation = 'Routine follow-up recommended. No immediate treatment required.';
+            let urgency = 'Non-urgent';
+            
+            if (data.prediction.includes('Diabetic Retinopathy3') || 
+                data.prediction.includes('Severe Hypertensive Retinopathy') ||
+                data.prediction.includes('Rhegmatogenous Retinal Detachment')) {
+                severityClass = 'severity-high';
+                severityText = 'High Risk';
+                severityIcon = 'fa-exclamation-triangle';
+                recommendation = 'Immediate specialist referral required. Condition may lead to vision loss if untreated.';
+                urgency = 'Emergency';
+            } else if (data.prediction.includes('Diabetic Retinopathy2') ||
+                      data.prediction.includes('Possible Glaucoma') ||
+                      data.prediction.includes('Branch Retinal Vein Occlusion')) {
+                severityClass = 'severity-medium';
+                severityText = 'Moderate Risk';
+                severityIcon = 'fa-exclamation-circle';
+                recommendation = 'Specialist evaluation recommended within 2-4 weeks. Condition may progress without intervention.';
+                urgency = 'Priority';
+            }
+            
+            // Format the diagnosis report
+            diagnosisContainer.innerHTML = `
+                <div class="diagnosis-card fade-in">
+                    <h3 class="diagnosis-title"><i class="fas fa-diagnoses"></i> Primary Diagnosis</h3>
+                    <p class="diagnosis-value">${data.prediction}</p>
+                    
+                    <div class="confidence-meter">
+                        <div class="confidence-level" style="width: ${confidencePercent}%"></div>
+                    </div>
+                    <p>Confidence: <strong>${confidencePercent}%</strong></p>
+                    
+                    <p>Severity: <span class="${severityClass}"><i class="fas ${severityIcon} severity-icon"></i> ${severityText}</span></p>
+                    <p>Urgency: <strong>${urgency}</strong></p>
+                </div>
+                
+                <div class="detailed-report fade-in" style="animation-delay: 0.2s;">
+                    <div class="report-section">
+                        <h4><i class="fas fa-file-medical-alt"></i> Clinical Summary</h4>
+                        <p>The analysis of the fundus image indicates <strong>${data.prediction}</strong> with high confidence. This condition is classified as <span class="${severityClass}">${severityText.toLowerCase()}</span> and requires <strong>${urgency.toLowerCase()}</strong> attention.</p>
+                        <p>${recommendation}</p>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h4><i class="fas fa-chart-bar"></i> Detailed Probabilities</h4>
+                        <table class="probabilities-table">
+                            <thead>
+                                <tr>
+                                    <th>Condition</th>
+                                    <th>Probability</th>
+                                </tr>
+                            </thead>
+                            <tbody id="probabilities-body">
+                                <!-- Will be filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="report-section">
+                        <h4><i class="fas fa-clipboard-check"></i> Image Quality Assessment</h4>
+                        <div class="report-features">
+                            <div class="feature-card">
+                                <h4 class="feature-title"><i class="fas fa-star"></i> Quality Score</h4>
+                                <p class="feature-value">${Math.round(data.image_quality * 100)}/100</p>
+                            </div>
+                            <div class="feature-card">
+                                <h4 class="feature-title"><i class="fas fa-eye"></i> Laterality</h4>
+                                <p class="feature-value">${data.laterality}</p>
+                            </div>
+                            <div class="feature-card">
+                                <h4 class="feature-title"><i class="fas fa-camera"></i> Artifacts</h4>
+                                <p class="feature-value">${data.artifacts_detected ? 'Detected' : 'None Detected'}</p>
+                            </div>
+                            <div class="feature-card">
+                                <h4 class="feature-title"><i class="fas fa-stopwatch"></i> Processing Time</h4>
+                                <p class="feature-value">${data.processing_time}s</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="report-actions fade-in" style="animation-delay: 0.4s;">
+                    <button class="btn btn-gold" onclick="exportReport('pdf')"><i class="fas fa-file-pdf"></i> Export as PDF</button>
+                    <button class="btn" onclick="exportReport('image')"><i class="fas fa-file-image"></i> Save with Results</button>
+                    <button class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print Report</button>
+                </div>
+            `;
+            
+            // Add probabilities to the table
+            const probabilitiesBody = document.getElementById('probabilities-body');
+            
+            // Create an array of {class, probability} pairs
+            const classProbabilities = [];
+            for (let i = 0; i < data.probabilities.length; i++) {
+                classProbabilities.push({
+                    class: CLASS_NAMES[i],
+                    probability: data.probabilities[i]
+                });
+            }
+            
+            // Sort by probability (descending)
+            classProbabilities.sort((a, b) => b.probability - a.probability);
+            
+            // Display top 10 results
+            const topResults = classProbabilities.slice(0, 10);
+            
+            topResults.forEach(item => {
+                const row = document.createElement('tr');
+                const probPercent = Math.round(item.probability * 100);
+                
+                row.innerHTML = `
+                    <td>${item.class}</td>
+                    <td>
+                        ${probPercent}%
+                        <div class="probability-bar">
+                            <div class="probability-value" style="width: ${probPercent}%"></div>
+                        </div>
+                    </td>
+                `;
+                
+                probabilitiesBody.appendChild(row);
+            });
+            
+            // Animate the confidence and probability bars
+            setTimeout(() => {
+                document.querySelectorAll('.confidence-level, .probability-value').forEach(el => {
+                    el.style.width = el.style.width;
+                });
+            }, 100);
+        }
+        
+        function exportReport(format) {
+            // In a real implementation, this would generate and download the report
+            // For demo purposes, we'll just show an alert
+            let message = '';
+            
+            if (format === 'pdf') {
+                message = 'PDF report generation started. This may take a moment...';
+            } else if (format === 'image') {
+                message = 'Saving image with diagnostic overlay...';
+            }
+            
+            alert(message);
+            
+            // Actual implementation might use libraries like jsPDF or html2canvas
+            /*
+            if (format === 'pdf') {
+                const doc = new jsPDF();
+                doc.text('Darshan AI - Diagnostic Report', 10, 10);
+                // Add more content
+                doc.save('darshan-diagnostic-report.pdf');
+            } else if (format === 'image') {
+                html2canvas(document.querySelector('.diagnosis-container')).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'darshan-diagnosis.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }
+            */
+        }
+        
+        // Class names from your FastAPI endpoint
+        const CLASS_NAMES = [
+            'Bietti Crystalline Dystrophy', 'Blur Fundus With Suspected Pdiabetic Retinopathy',
+            'Blur Fundus Without Pdiabetic Retinopathy', 'Branch Retinal Vein Occlusion',
+            'Central Retinal Vein Occlusion', 'Central Serous Chorioretinopathy',
+            'Chorioretinal Atrophy-Coloboma', 'Congenital Disc Abnormality', 'Cotton-Wool Spots',
+            'Diabetic Retinopathy1', 'Diabetic Retinopathy2', 'Diabetic Retinopathy3',
+            'Disc Swelling And Elevation', 'Dragged Disc', 'Epiretinal Membrane', 'Fibrosis',
+            'Fundus Neoplasm', 'Large Optic Cup', 'Laser Spots', 'Macular Hole', 'Maculopathy',
+            'Massive Hard Exudates', 'Myelinated Nerve Fiber', 'Normal', 'Optic Atrophy',
+            'Pathological Myopia', 'Peripheral Retinal Degeneration And Break', 'Possible Glaucoma',
+            'Preretinal Hemorrhage', 'Retinal Artery Occlusion', 'Retinitis Pigmentosa',
+            'Rhegmatogenous Retinal Detachment', 'Severe Hypertensive Retinopathy',
+            'Silicon Oil In Eye', 'Tessellated Fundus', 'Vessel Tortuosity', 'Vitreous Particles',
+            'Vogt-Koyanagi-Harada Disease Disease', 'Yellow-White Spots-Flecks'
+        ];
+    </script>
+</body>
+</html>
